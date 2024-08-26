@@ -1,0 +1,73 @@
+.is-thinking {
+  margin-top: 10px;
+  width: 85px;
+  justify-content: space-around;
+  display: flex;
+}
+
+.thinking-dot-1,
+.thinking-dot-2,
+.thinking-dot-3,
+.thinking-dot-4,
+.thinking-dot-5 {
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background-color: #c1e0ff;
+}
+
+.thinking-dot-1 {
+  animation: thinking 1.5s linear infinite;
+  animation-delay: 01.1s;
+}
+
+.thinking-dot-2 {
+  animation: thinking 1.5s linear infinite;
+  animation-delay: 01.2s;
+}
+
+.thinking-dot-3 {
+  animation: thinking 1.5s linear infinite;
+  animation-delay: 01.3s;
+}
+
+.thinking-dot-4 {
+  animation: thinking 1.5s linear infinite;
+  animation-delay: 01.4s;
+}
+
+.thinking-dot-5 {
+  animation: thinking 1.5s linear infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes thinking {
+  0% {
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(0px);
+  }
+
+  35% {
+    transform: translateY(15px);
+  }
+
+  45% {
+    transform: translateY(0px);
+  }
+
+  60% {
+    transform: translateY(-15px);
+  }
+
+  75% {
+    background-color: white;
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}

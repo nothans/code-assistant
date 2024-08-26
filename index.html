@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Assistant</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png" />
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#5bbad5" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+        integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous" />
+    <link href="styles/prism.css?v0.1.1" rel="stylesheet" />
+    <link href="styles/prism-custom.css?v0.1.1" rel="stylesheet" />
+    <link href="styles/styles.css?v0.1.1" rel="stylesheet" />
+    <link href="styles/thinking.css?v0.1.1" rel="stylesheet" />
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <header class="bg-primary py-2">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="text-white mb-0">
+                    <i class="bi bi-terminal"></i> <span id="app_name">AI</span>
+                    <span class="d-none d-sm-inline">Assistant</span>
+                </h1>
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <span class="d-none d-sm-inline"><i class="bi bi-gear-fill"></i></span>
+                            <span class="current-mode">Default</span>
+                        </button>
+                        <ul class="dropdown-menu" id="app_modes">
+                            <li>
+                                <a class="dropdown-item" href="#" data-mode="Default">Default</a>
+                            </li>                         
+                            <li>
+                                <a class="dropdown-item" href="#" data-mode="Math">Math</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-mode="Flashcard">Flashcard</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-mode="Custom">Custom</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-light btn-sm me-2 d-none" id="custom_button"
+                        data-bs-toggle="modal" data-bs-target="#customPromptModal">
+                        <i class="bi bi-pencil-square"></i>
+                        <span class="d-none d-sm-inline">Custom</span>
+                    </button>
+                    <button class="btn btn-light btn-sm me-2" onclick="download_running_session()">
+                        <i class="bi bi-download"></i>
+                        <span class="d-none d-sm-inline">Download</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="scrollable-area" id="scrollableArea">
+        <div class="container">
+            <div class="row" id="responseArea"></div>
+            <div class="is-thinking mx-auto my-2 d-none" id="renderingArea">
+                <div class="thinking-dot-1"></div>
+                <div class="thinking-dot-2"></div>
+                <div class="thinking-dot-3"></div>
+                <div class="thinking-dot-4"></div>
+                <div class="thinking-dot-5"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer bg-secondary mt-auto py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 d-flex">
+                    <button class="btn btn-primary" id="random_prompt_button" type="button"
+                        onclick="openai_completions(random_user_prompt())">
+                        <i class="bi bi-shuffle"></i>
+                    </button>
+                    <input type="text" class="form-control mx-2" id="user_prompt_field" value="" />
+                    <button class="btn btn-primary" type="button" id="user_prompt_button"
+                        onclick="openai_completions()">
+                        <i class="bi bi-chat-square-fill"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12 text-center">
+                    <p class="small text-muted">
+                        <i class="bi bi-stars"></i> Surprises are possible.
+                        <i class="bi bi-github"></i> <a href="https://nothans.com" target="_blank"
+                            class="text-muted">NotHans</a>
+                        <i class="bi bi-x-circle"></i> <a href="" onclick="clear_cache()" class="text-muted"> Clear
+                            cache</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="customPromptModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Custom Prompt Settings <button type="button"
+                            class="btn btn-success ms-auto" id="save_changes">
+                            <i class="bi bi-save"></i> Save
+                        </button></h5>
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal"></button>
+
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <div class="mb-3">
+                            <label for="system_prompt" class="form-label">
+                                <h6>System Prompt</h6>
+                            </label>
+                            <textarea class="form-control" id="system_prompt" name="system_prompt" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="default_assistant_message" class="form-label">
+                                        <h6>Default Assistant Message</h6>
+                                    </label>
+                                    <input type="text" class="form-control" id="default_assistant_message"
+                                        name="default_assistant_message" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="default_prompt" class="form-label">
+                                        <h6>Default User Prompt</h6>
+                                    </label>
+                                    <input type="text" class="form-control" id="default_prompt" name="default_prompt" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="user_prompt_format" class="form-label">
+                                        <h6>User Prompt Format</h6>
+                                    </label>
+                                    <input type="text" class="form-control" id="user_prompt_format"
+                                        name="user_prompt_format" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="temperature" class="form-label">
+                                        <h6>Temperature</h6>
+                                    </label>
+                                    <input type="number" step="0.1" class="form-control" id="temperature"
+                                        name="temperature" min="0" max="1" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="model" class="form-label">
+                                        <h6>Model</h6>
+                                    </label>
+                                    <select class="form-select" id="model" name="model">
+                                        <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+                                        <option value="gpt-4o">gpt-4o</option>
+                                        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <h6>User Prompts</h6>
+                                    </label>
+                                    <div id="user_prompts_container"></div>
+                                    <button type="button" class="btn btn-primary btn-sm mt-2" id="add_prompt">
+                                        Add User Prompt
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+        integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+        integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+    <script src="scripts/prism.js?v0.1.5"></script>
+    <script src="scripts/prism-buttons.js?v0.1.5"></script>
+    <script src="scripts/app.js?v0.1.5"></script>
+    <script src="scripts/prompt-settings.js?v0.1.5"></script>
+    <script src="scripts/openai-api.js?v0.1.5"></script>
+</body>
+
+</html>
