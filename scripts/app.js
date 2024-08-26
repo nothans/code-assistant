@@ -6,6 +6,7 @@ const MAX_ASSISTANT_TOKENS = 1000;
 const OPENAI_API_KEY = get_openai_api_key();
 const DEFAULT_CODE_LANGUAGE = "python";
 const DEFAULT_CODE_FILE_EXT = "py";
+const DEFAULT_CODE_COMMENT = "#";
 
 let prompt_settings = {};
 let app_mode = '';
@@ -299,7 +300,7 @@ function download_running_session() {
 }
 
 function add_section_to_running_session(section_header) {
-  running_session += "%% " + section_header + "\n";
+  running_session += DEFAULT_CODE_COMMENT + " " + section_header + "\n";
 }
 
 function add_to_running_session(section) {
