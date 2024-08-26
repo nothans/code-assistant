@@ -28,9 +28,6 @@ async function openai_completions(user_prompt, system_prompt) {
     system_text = prompt_settings.system_prompt;
   }
 
-  // add additional system prompt instructions to the system prompt
-  system_text += " " + SYSTEM_PROMPT_INSTRUCTIONS.join(" ");
-
   if (user_text) {
     try {
 
@@ -189,9 +186,32 @@ function render_response(response) {
   newDiv.innerHTML = modified_response_html;
   responseArea.appendChild(newDiv);
 
+  // render flashcards
+  const flashcard_fronts = newDiv.getElementsByClassName("flashcard-front");
+
+  for (const flashcard_front of flashcard_fronts) {    
+    flashcard_front.classList.add("card");
+    
+    flashcard_front.addEventListener("click", function () {
+      const flashcard_back = flashcard_front.nextElementSibling;
+      flashcard_back.classList.remove("d-none");
+    });
+  }
+
+  const flashcard_backs = newDiv.getElementsByClassName("flashcard-back");
+
+  for (const flashcard_back of flashcard_backs) {
+    flashcard_back.classList.add("card");
+    flashcard_back.classList.add("d-none");
+  }
+
+  // render followup prompts
   const followup_prompt_buttons = newDiv.querySelectorAll('button.followup-prompt');
 
   for (const followup_prompt_button of followup_prompt_buttons) {
+
+    followup_prompt_button.innerHTML = `<i class="bi bi-arrow-right"></i> ${followup_prompt_button.textContent}`;
+    
     followup_prompt_button.addEventListener("click", function () {
       openai_completions(followup_prompt_button.textContent);
     });

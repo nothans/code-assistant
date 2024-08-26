@@ -8,17 +8,10 @@ const DEFAULT_CODE_ACTIONS = ["explain", "copy-to-clipboard"];
 
 const DEFAULT_MODEL = "gpt-4o";
 
-// create array of additional system prompt instructions
-const SYSTEM_PROMPT_INSTRUCTIONS = [
-  "Provide code when appropriate. When you provide code, wrap the code in the HTML tags: <pre> and <code>.",
-  "In each response, include 3 additional creative follow-up prompts, enclosed within the HTML tag: <button>.",
-  "When you provide a flashcard, wrap each side of the flashcard in the HTML tags: div with class flashcard-front and div with class flashcard-back.",
-];
-
 const prompt_mode_settings = {
   default: {
     system_prompt:
-    "You are a Python expert assisting a new user.",
+    "You are a Python expert assisting a new user. Provide code when appropriate. When you provide code, wrap the code in the HTML tags: <pre> and <code>. In each response, include 3 additional creative follow-up prompts, enclosed within the HTML tag: <button>.",
     default_prompt: "How do I plot a sine wave?",
     default_assistant_message: "Hello, what would you like to try in Python?",
     user_prompt_format: "Format lists as HTML.",
@@ -47,7 +40,7 @@ const prompt_mode_settings = {
   },  
   math: {
     system_prompt:
-      "You are a math expert and teaching a new person linear algebra, calculus, and other math for engineering.",
+      "You are a math expert and teaching a new person linear algebra, calculus, and other math for engineering. In each response, include 3 additional creative follow-up prompts, enclosed within the HTML tag: <button>.",
     default_prompt: "What is a matrix?",
     default_assistant_message:
       "Hello, let me help you with your math questions.",
@@ -69,7 +62,7 @@ const prompt_mode_settings = {
   },
   flashcard: {
     system_prompt:
-      "You are a Python expert assisting a new user. Create a flashcard to help the user learn the python code with a question on the front and the answer on the back.",
+      "You are a Python expert assisting a new user. Create a flashcard to help the user learn the python code with a question on the front and the answer on the back. When you provide a flashcard, wrap each side of the flashcard in the HTML tags: div with class flashcard-front and div with class flashcard-back. Provide 1 suggestion for the next flashcard prompt, enclosed within the HTML tag: <button>.",
     default_prompt: "Start teaching me Python with a flashcard",
     default_assistant_message: "Hello, let me help you learn Python.",
     user_prompt_format: "",
@@ -77,7 +70,7 @@ const prompt_mode_settings = {
     temperature: 0.0,
   },
   custom_defaults: {
-    system_prompt: "You are a Python expert assisting a new user.",
+    system_prompt: "You are a Python expert assisting a new user. Provide code when appropriate. When you provide code, wrap the code in the HTML tags: <pre> and <code>. In each response, include 3 additional creative follow-up prompts, enclosed within the HTML tag: <button>.",
     default_prompt: "Create a scatter plot",
     default_assistant_message: "Hello, what would you like to try in Python?",
     user_prompt_format: "",
