@@ -79,5 +79,6 @@ const prompt_mode_settings = {
       "Plot a histogram with specified bins",
     ],
     temperature: 0.5,
+    model: "gpt-4o",
   },
 };
