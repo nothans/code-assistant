@@ -1,5 +1,3 @@
-const DEFAULT_CODE_LANGUAGE = "python";
-
 const SYSTEM_PROMPT_EXPLAIN =
   "You are a Python expert. Reply with a detailed explanation of the function or code that you are asked about. When you reply, always suggest 3 follow English prompts to keep the conversation going with each prompt wrapped in the HTML tag: <button>.";
 

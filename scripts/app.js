@@ -4,6 +4,8 @@ const APP_MODE_CUSTOM_KEY = "code_app_mode_custom";
 const DEFAULT_APP_MODE = "Default";
 const MAX_ASSISTANT_TOKENS = 1000;
 const OPENAI_API_KEY = get_openai_api_key();
+const DEFAULT_CODE_LANGUAGE = "python";
+const DEFAULT_CODE_FILE_EXT = "py";
 
 let prompt_settings = {};
 let app_mode = '';
@@ -281,7 +283,7 @@ function download_running_session() {
   }
 
   const dateTime = new Date().toISOString().replace(/[:.-]/g, "");
-  const filename = `session_${dateTime}.m`;
+  const filename = `session_${dateTime}.${DEFAULT_CODE_FILE_EXT}`;
   const blob = new Blob([running_session], {
     type: "text/plain;charset=utf-8",
   });
