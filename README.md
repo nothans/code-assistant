@@ -66,6 +66,5 @@ The app uses your browser's local storage to save:
 - Your OpenAI API Key
 - Current app mode selection
 - Custom mode settings
-- Conversation history
 
 You can clear the cache using the "Clear cache" link at the bottom of the page.
