@@ -685,3 +685,286 @@ function replace_markdown(input_string) {
 
   return { replaced_string: replaced, languages: detected_languages };
 }
+
+// Pyodide execution functionality
+let pyodide_instance = null;
+
+async function initialize_pyodide() {
+  if (pyodide_instance) {
+    return pyodide_instance;
+  }
+
+  // Show loading indicator
+  document.getElementById("pyodideLoading").style.display = "block";
+
+  try {
+    pyodide_instance = await loadPyodide();
+
+    // Install essential scientific packages
+    console.log("Installing scientific packages (numpy, scipy, matplotlib)...");
+    await pyodide_instance.loadPackage(["numpy", "scipy", "matplotlib"]);
+    console.log("Scientific packages installed successfully");
+
+    // Set up output capture
+    pyodide_instance.runPython(`
+import sys
+import io
+
+class OutputCapture:
+    def __init__(self):
+        self.output = []
+
+    def write(self, text):
+        if text.strip():
+            self.output.append(text)
+
+    def flush(self):
+        pass
+
+    def get_output(self):
+        return ''.join(self.output)
+
+    def clear(self):
+        self.output = []
+
+# Create output capture instances
+_stdout_capture = OutputCapture()
+_stderr_capture = OutputCapture()
+`);
+
+    console.log("Pyodide initialized successfully");
+    return pyodide_instance;
+  } catch (error) {
+    console.error("Failed to initialize Pyodide:", error);
+    throw error;
+  } finally {
+    // Hide loading indicator
+    document.getElementById("pyodideLoading").style.display = "none";
+  }
+}
+
+function clear_modal_sections() {
+  // Hide all sections
+  document.getElementById("outputSection").style.display = "none";
+  document.getElementById("errorSection").style.display = "none";
+  document.getElementById("executionTime").style.display = "none";
+  document.getElementById("executionLoading").style.display = "none";
+
+  // Clear content including any matplotlib plots
+  const outputContainer = document.getElementById("codeOutput");
+  outputContainer.innerHTML = ""; // Use innerHTML to clear both text and HTML content (plots)
+
+  document.getElementById("codeError").textContent = "";
+  document.getElementById("executionTimeValue").textContent = "0";
+
+  // Clear matplotlib target to prevent plot accumulation
+  if (window.pyodide_instance) {
+    try {
+      pyodide_instance.runPython(`
+import matplotlib.pyplot as plt
+plt.close('all')  # Close all matplotlib figures
+`);
+    } catch (error) {
+      // Ignore errors if matplotlib not available
+      console.log("Note: matplotlib not available for cleanup");
+    }
+  }
+}
+
+async function run_python_code(code) {
+  const start_time = performance.now();
+
+  try {
+    // Show execution loading
+    document.getElementById("executionLoading").style.display = "block";
+
+    // Set up matplotlib target for plot rendering
+    const outputContainer = document.getElementById("codeOutput");
+    document.pyodideMplTarget = outputContainer;
+
+    // Set up matplotlib and output capture
+    pyodide_instance.runPython(`
+_stdout_capture.clear()
+_stderr_capture.clear()
+
+# Configure matplotlib for web rendering
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+    # Use the web-compatible backend
+    matplotlib.use('webagg')
+    plt.close('all')  # Close any existing figures
+except ImportError:
+    pass  # matplotlib not available
+
+# Redirect stdout and stderr
+original_stdout = sys.stdout
+original_stderr = sys.stderr
+sys.stdout = _stdout_capture
+sys.stderr = _stderr_capture
+`);
+
+    let result;
+    let has_output = false;
+
+    try {
+      // Execute the user code
+      result = pyodide_instance.runPython(code);
+    } catch (error) {
+      throw error;
+    } finally {
+      // Restore original stdout/stderr and get captured output
+      const outputs = pyodide_instance.runPython(`
+sys.stdout = original_stdout
+sys.stderr = original_stderr
+
+stdout_content = _stdout_capture.get_output()
+stderr_content = _stderr_capture.get_output()
+
+# Return as a dictionary that can be accessed from JavaScript
+{
+    'stdout': stdout_content,
+    'stderr': stderr_content
+}
+`);
+
+      const stdout_content = outputs.get('stdout');
+      const stderr_content = outputs.get('stderr');
+
+      // Check if matplotlib plots were generated (matplotlib appends to our target container)
+      const outputContainer = document.getElementById("codeOutput");
+      const has_plots = outputContainer.children.length > 0;
+
+      // Display stdout output if any
+      if (stdout_content) {
+        // If there are plots, prepend text content; otherwise set as only content
+        if (has_plots) {
+          const textDiv = document.createElement("div");
+          textDiv.textContent = stdout_content;
+          textDiv.style.marginBottom = "10px";
+          outputContainer.insertBefore(textDiv, outputContainer.firstChild);
+        } else {
+          outputContainer.textContent = stdout_content;
+        }
+        document.getElementById("outputSection").style.display = "block";
+        has_output = true;
+      }
+
+      // Display stderr output if any
+      if (stderr_content) {
+        document.getElementById("codeError").textContent = stderr_content;
+        document.getElementById("errorSection").style.display = "block";
+        has_output = true;
+      }
+
+      // Show plots if they exist (even without text output)
+      if (has_plots) {
+        document.getElementById("outputSection").style.display = "block";
+        has_output = true;
+      }
+    }
+
+    // Display expression result if no print output and result exists
+    if (!has_output && result !== undefined && result !== null) {
+      let result_str;
+      if (typeof result === 'object' && result.toString) {
+        result_str = result.toString();
+      } else {
+        result_str = String(result);
+      }
+
+      if (result_str.trim()) {
+        document.getElementById("codeOutput").textContent = result_str;
+        document.getElementById("outputSection").style.display = "block";
+      }
+    }
+
+    // Show execution time
+    const execution_time = Math.round(performance.now() - start_time);
+    document.getElementById("executionTimeValue").textContent = execution_time;
+    document.getElementById("executionTime").style.display = "block";
+
+  } catch (error) {
+    // Display Python error with more detailed information
+    let error_message = error.toString();
+
+    // Try to get more detailed error info if available
+    if (error.name && error.message) {
+      error_message = `${error.name}: ${error.message}`;
+    }
+
+    // For Pyodide-specific errors, try to extract more information
+    if (error.name === 'PythonError') {
+      try {
+        // Try to get the Python traceback
+        const traceback = pyodide_instance.runPython(`
+import sys
+import traceback
+traceback.format_exc()
+`);
+        if (traceback && traceback.trim() !== 'NoneType: None') {
+          error_message = traceback;
+        }
+      } catch (e) {
+        // If we can't get traceback, show original error
+        console.log("Could not get Python traceback:", e);
+      }
+    }
+
+    document.getElementById("codeError").textContent = error_message;
+    document.getElementById("errorSection").style.display = "block";
+
+    // Still show execution time even for errors
+    const execution_time = Math.round(performance.now() - start_time);
+    document.getElementById("executionTimeValue").textContent = execution_time;
+    document.getElementById("executionTime").style.display = "block";
+  } finally {
+    // Hide execution loading
+    document.getElementById("executionLoading").style.display = "none";
+  }
+}
+
+async function execute_python_code(code) {
+  // Store code in hidden input for Run Again functionality
+  document.getElementById("currentCode").value = code;
+
+  // Clear previous results
+  clear_modal_sections();
+
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById("runCodeModal"));
+  modal.show();
+
+  try {
+    // Initialize Pyodide if needed
+    await initialize_pyodide();
+
+    // Run the code
+    await run_python_code(code);
+
+  } catch (error) {
+    // Show initialization error
+    document.getElementById("codeError").textContent = `Failed to initialize Python runtime: ${error.message}`;
+    document.getElementById("errorSection").style.display = "block";
+    console.error("Pyodide execution error:", error);
+  }
+}
+
+// Set up Run Again button functionality
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("runCodeAgain").addEventListener("click", async function() {
+    const code = document.getElementById("currentCode").value;
+
+    // Clear previous results
+    clear_modal_sections();
+
+    try {
+      // Run the code again
+      await run_python_code(code);
+    } catch (error) {
+      document.getElementById("codeError").textContent = `Execution error: ${error.message}`;
+      document.getElementById("errorSection").style.display = "block";
+      console.error("Code re-execution error:", error);
+    }
+  });
+});

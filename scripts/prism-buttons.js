@@ -72,3 +72,40 @@ Prism.plugins.toolbar.registerButton("make-function", function (env) {
 
   return button;
 });
+
+Prism.plugins.toolbar.registerButton("run-code", function (env) {
+  const button = document.createElement("button");
+  button.innerHTML = '<i class="bi bi-play-fill"></i> Run Code';
+
+  const select_element_text = (element) => {
+    let selected_text = "";
+
+    if (document.body.createTextRange) {
+      const range = document.body.createTextRange();
+      range.moveToElementText(element);
+      range.select();
+      selected_text = range.text;
+    } else if (window.getSelection) {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      selected_text = selection.toString();
+    }
+
+    return selected_text;
+  };
+
+  button.addEventListener("click", function () {
+    const code_to_run = select_element_text(env.element);
+
+    if (code_to_run.trim()) {
+      execute_python_code(code_to_run);
+    } else {
+      alert("No code found to execute.");
+    }
+  });
+
+  return button;
+});

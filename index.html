@@ -20,6 +20,7 @@
     <link href="styles/prism-custom.css?v0.1.1" rel="stylesheet" />
     <link href="styles/styles.css?v0.1.1" rel="stylesheet" />
     <link href="styles/thinking.css?v0.1.1" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide.js"></script>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -223,6 +224,69 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Run Code Modal -->
+    <div class="modal fade" id="runCodeModal" tabindex="-1">
+        <div class="modal-dialog modal-xl" style="max-width: 95vw; width: 95vw;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-play-fill"></i> Run Python Code
+                    </h5>
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden storage for code (used by Run Again functionality) -->
+                    <input type="hidden" id="currentCode" value="" />
+
+                    <div class="mb-3" id="pyodideLoading" style="display: none;">
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                Initializing Python runtime (this may take a moment on first use)...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="executionLoading" style="display: none;">
+                        <div class="alert alert-primary d-flex align-items-center" role="alert">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Executing...</span>
+                            </div>
+                            <div>
+                                Executing code...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="outputSection" style="display: none;">
+                        <div class="bg-success bg-opacity-10 p-3 rounded border border-success" id="codeOutput" style="white-space: pre-wrap; max-height: 70vh; overflow-y: auto; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.9em; line-height: 1.4;"></div>
+                    </div>
+
+                    <div class="mb-3" id="errorSection" style="display: none;">
+                        <label for="codeError" class="form-label">
+                            <h6>Error</h6>
+                        </label>
+                        <pre class="bg-danger bg-opacity-10 p-3 rounded border border-danger" id="codeError" style="white-space: pre-wrap; max-height: 50vh; overflow-y: auto;"></pre>
+                    </div>
+
+                    <div class="mb-3" id="executionTime" style="display: none;">
+                        <small class="text-muted">
+                            <i class="bi bi-stopwatch"></i> Execution time: <span id="executionTimeValue">0</span>ms
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="runCodeAgain">
+                        <i class="bi bi-arrow-clockwise"></i> Run Again
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
