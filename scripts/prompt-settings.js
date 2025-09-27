@@ -4,7 +4,7 @@ const SYSTEM_PROMPT_EXPLAIN =
 const USER_PROMPT_DEFAULT =
   "Start by asking me what I would like to try in Python";
 
-const DEFAULT_CODE_ACTIONS = ["explain", "copy-to-clipboard"];
+const DEFAULT_CODE_ACTIONS = ["explain", "copy-to-clipboard", "run-code"];
 
 const DEFAULT_MODEL = "gpt-4o";
 

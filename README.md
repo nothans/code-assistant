@@ -17,6 +17,14 @@ A simple web application that helps you code with AI. This app provides an inter
   - Model selection (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)
   - Custom user prompt templates
 
+- **Python Code Execution**:
+  - In-browser Python runtime using Pyodide WebAssembly
+  - Scientific computing packages (NumPy, SciPy, Matplotlib) pre-installed
+  - Interactive matplotlib plots with zoom, pan, and download capabilities
+  - Large modal interface (95% screen width) for optimal code output viewing
+  - Comprehensive error reporting with Python tracebacks
+  - Run Code buttons on all Python code snippets
+
 - **User Interface Features**:
   - Syntax highlighting for code snippets
   - Copy-to-clipboard functionality for code
@@ -29,11 +37,14 @@ A simple web application that helps you code with AI. This app provides an inter
   - Mathematical formula rendering with KaTeX
   - Code syntax highlighting with Prism.js
   - Bootstrap 5 for responsive layout
+  - Pyodide WebAssembly for client-side Python execution
+  - Automatic scientific package management
 
 ## Requirements
 
 - An OpenAI API Key is required to use this application
-- Modern web browser with JavaScript enabled
+- Modern web browser with JavaScript and WebAssembly support
+- Internet connection for initial package downloads (cached afterward)
 
 ## Usage
 
@@ -43,6 +54,8 @@ A simple web application that helps you code with AI. This app provides an inter
 4. Type your question or prompt in the input field at the bottom
 5. Press Enter or click the chat button to submit
 6. Interact with the AI responses and suggested follow-up prompts
+7. Click "Run Code" on Python code snippets to execute them in the browser
+8. View plots and output in the large execution modal
 
 ## Customization
 
@@ -67,4 +80,21 @@ The app uses your browser's local storage to save:
 - Current app mode selection
 - Custom mode settings
 
-You can clear the cache using the "Clear cache" link at the bottom of the page.
+You can clear the cache using the "Clear App Cache" option in the Settings modal.
+
+## Python Code Execution
+
+The application includes a full Python environment that runs entirely in your browser:
+
+- **Scientific Computing**: NumPy, SciPy, and Matplotlib are automatically available
+- **Interactive Plots**: Create and interact with matplotlib visualizations
+- **No Installation**: Everything runs in WebAssembly - no local Python installation needed
+- **Offline Capable**: After initial package download, code execution works offline
+- **Data Analysis**: Perform complex data analysis and visualization tasks
+- **Educational**: Perfect for learning Python, data science, and scientific computing
+
+### Supported Libraries
+- **NumPy**: Numerical computing and array operations
+- **SciPy**: Scientific computing, signal processing, optimization
+- **Matplotlib**: 2D and 3D plotting with interactive controls
+- **Standard Library**: Full Python standard library support
