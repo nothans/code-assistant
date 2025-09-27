@@ -1,6 +1,7 @@
 const APP_NAME = "Code";
 const APP_MODE_KEY = "code_app_mode";
 const APP_MODE_CUSTOM_KEY = "code_app_mode_custom";
+const APP_API_KEY = "code_app_api_key";
 const DEFAULT_APP_MODE = "Default";
 const MAX_ASSISTANT_TOKENS = 1000;
 const OPENAI_API_KEY = get_openai_api_key();
@@ -19,6 +20,17 @@ document.addEventListener("DOMContentLoaded", function () {
   
   document.title = APP_NAME + " Assistant";
   document.getElementById("app_name").textContent = APP_NAME;
+
+  // Initialize settings modal
+  document.getElementById("settingsModal").addEventListener("show.bs.modal", () => {
+    // Load the current API key into the input field
+    const apiKeyInput = document.getElementById("api_key_input");
+    if (localStorage.getItem(APP_API_KEY)) {
+      apiKeyInput.value = localStorage.getItem(APP_API_KEY);
+    } else {
+      apiKeyInput.value = "";
+    }
+  });
 
   const user_input_field = document.getElementById("user_prompt_field");
   const user_input_button = document.getElementById("user_prompt_button");
@@ -218,10 +230,18 @@ function clear_renderingArea() {
 }
 
 function get_openai_api_key() {
-  if (localStorage.getItem("OPENAI_API_KEY")) {
-    return localStorage.getItem("OPENAI_API_KEY");
+  if (localStorage.getItem(APP_API_KEY)) {
+    return localStorage.getItem(APP_API_KEY);
   } else {
-    return prompt_for_openai_api_key();
+    // For backward compatibility
+    if (localStorage.getItem("OPENAI_API_KEY")) {
+      const oldKey = localStorage.getItem("OPENAI_API_KEY");
+      localStorage.setItem(APP_API_KEY, oldKey);
+      localStorage.removeItem("OPENAI_API_KEY");
+      return oldKey;
+    } else {
+      return prompt_for_openai_api_key();
+    }
   }
 }
 
@@ -229,8 +249,8 @@ function prompt_for_openai_api_key() {
   let apiKey = prompt("Please enter your OpenAI API Key:");
 
   if (apiKey && apiKey.trim()) {
-    localStorage.setItem("OPENAI_API_KEY", apiKey);
-    return localStorage.getItem("OPENAI_API_KEY");
+    localStorage.setItem(APP_API_KEY, apiKey);
+    return localStorage.getItem(APP_API_KEY);
   } else {
     return prompt_for_openai_api_key();
   }
@@ -271,12 +291,61 @@ function enable_buttons() {
   }
 }
 
-function clear_cache() {
-  const confirmed = confirm('Are you sure you want to clear cache and reload?');
+function clear_cache_from_modal() {
+  const confirmed = confirm('Are you sure you want to clear app cache and reload?');
 
   if (confirmed) {
-    localStorage.clear();
+    // Close the modal before clearing cache
+    const modal = bootstrap.Modal.getInstance(document.getElementById("settingsModal"));
+    modal.hide();
+    
+    // Clear only app-related localStorage items
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('code_')) {
+        localStorage.removeItem(key);
+      }
+    }
+    
     location.reload(true);
+  }
+}
+
+function reset_api_key() {
+  const confirmed = confirm('Are you sure you want to reset your API key?');
+
+  if (confirmed) {
+    // Remove the API key from localStorage
+    localStorage.removeItem(APP_API_KEY);
+    
+    // Close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById("settingsModal"));
+    modal.hide();
+    
+    // Prompt for a new API key
+    OPENAI_API_KEY = prompt_for_openai_api_key();
+    
+    // Show confirmation
+    alert('API key has been reset successfully.');
+  }
+}
+
+function update_api_key() {
+  const apiKeyInput = document.getElementById('api_key_input');
+  const apiKey = apiKeyInput.value.trim();
+  
+  if (apiKey) {
+    localStorage.setItem(APP_API_KEY, apiKey);
+    OPENAI_API_KEY = apiKey;
+    
+    // Close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById("settingsModal"));
+    modal.hide();
+    
+    // Show confirmation
+    alert('API key has been updated successfully.');
+  } else {
+    alert('Please enter a valid API key.');
   }
 }
 
