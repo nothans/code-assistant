@@ -85,3 +85,20 @@ pre {
   margin-bottom: 10px;
   position: relative;
 }
+
+/* Settings Modal Styles */
+.list-group-item-action {
+  transition: background-color 0.2s ease;
+}
+
+.list-group-item-action:hover {
+  background-color: #f0f8ff;
+}
+
+.list-group-item h5 {
+  color: #0d6efd;
+}
+
+.modal-header .btn-close {
+  margin: -0.5rem -0.5rem -0.5rem auto;
+}
